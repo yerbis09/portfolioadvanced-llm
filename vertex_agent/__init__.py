@@ -15,6 +15,7 @@ Architecture:
 
 from vertex_agent.agent import Agent
 from vertex_agent.ingester import Ingester
+from vertex_agent.mcp_server import main as mcp_main
 from vertex_agent.retriever import Retriever
 
-__all__ = ["Agent", "Ingester", "Retriever"]
+__all__ = ["Agent", "Ingester", "Retriever", "mcp_main"]

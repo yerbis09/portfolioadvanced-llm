@@ -77,6 +77,9 @@ uv run python -m pubsub_archetype.gateway
 # Tests
 uv run pytest -v
 
+# MCP server (stdio)
+uv run portfolioadvanced-llm-mcp
+
 # Lint + format
 uv run ruff check pubsub_archetype/
 uv run ruff format --check pubsub_archetype/
@@ -186,7 +189,7 @@ The design is contributed back to the GoogleCloudPlatform ecosystem via
 - [ ] Continuous retraining trigger on new documentation ingestion
 
 ### Phase 4 — MCP server + continuous improvement loop
-- [ ] MCP (Model Context Protocol) server exposing GCP knowledge to AI coding agents
+- [x] MCP (Model Context Protocol) server exposing GCP knowledge to AI coding agents
 - [ ] Copilot / Claude integration via `.mcp.json` (already wired in this repo)
 - [ ] Agent-driven GCP service improvement suggestions with PR generation
 - [ ] Monitoring dashboard in BigQuery + Looker Studio
@@ -209,6 +212,14 @@ portfolioadvanced-llm/
 │       ├── test_archetype.py
 │       ├── test_classifying_receiver.py
 │       └── test_gateway.py
+├── vertex_agent/
+│   ├── ingester.py                # Pub/Sub -> BigQuery chunk pipeline
+│   ├── retriever.py               # BigQuery retrieval layer
+│   ├── agent.py                   # Vertex AI Gemini RAG agent
+│   ├── mcp_server.py              # MCP stdio server wrapping the agent
+│   └── tests/
+│       ├── test_vertex_agent.py
+│       └── test_mcp_server.py
 ├── .github/
 │   ├── workflows/
 │   │   ├── ci.yml                # Push CI: secrets → lint → tests → sonar

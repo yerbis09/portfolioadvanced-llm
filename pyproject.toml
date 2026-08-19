@@ -13,10 +13,12 @@ dependencies = [
     "google-cloud-bigquery>=3.25.0",
     "google-cloud-pubsub>=2.23.0",
     "google-cloud-aiplatform>=1.65.0",
+    "mcp>=1.0.0",
 ]
 
 [project.scripts]
 portfolioadvanced-llm = "portfolioadvanced_llm:main"
+portfolioadvanced-llm-mcp = "vertex_agent.mcp_server:main"
 
 [build-system]
 requires = ["uv_build>=0.12.5,<0.13.0"]
