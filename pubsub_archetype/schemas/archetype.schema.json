@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "archetype.schema.json",
+  "title": "LLM Event Archetype",
+  "description": "Canonical contract for every payload published to the portfolioadvanced-llm topic.",
+  "type": "object",
+  "required": ["event_type", "payload", "version"],
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "enum": ["llm_request", "llm_response", "eval_result", "data_ingest"]
+    },
+    "payload": {
+      "type": "object"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "trace_id": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,57 @@
+[project]
+name = "portfolioadvanced-llm"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "germancv", email = "germancv@ext.inditex.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "jsonschema>=4.26.0",
+    "pydantic>=2.13.4",
+]
+
+[project.scripts]
+portfolioadvanced-llm = "portfolioadvanced_llm:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["pubsub_archetype/tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "ANN", # flake8-annotations
+    "S",   # flake8-bandit (security)
+    "RUF", # ruff-specific
+]
+ignore = [
+    "S101",   # use of assert (ok in tests)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"pubsub_archetype/tests/*" = ["ANN", "S"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
