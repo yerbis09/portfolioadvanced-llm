@@ -87,6 +87,31 @@ uv run ruff format --check pubsub_archetype/
 
 **WSL users**: everything is pre-configured in WSL. `bash push.sh` to push using your token from `local.settings`.
 
+### OAuth / ADC for real GCP smoke tests
+
+This repo does **not** store service account keys. For real GCP integration tests,
+each user authenticates with their own Google account and ADC:
+
+```bash
+gcloud auth login
+gcloud auth application-default login
+gcloud auth application-default set-quota-project portfolioadvanced-llm
+```
+
+Then run the smoke test:
+
+```bash
+uv run python -m scripts.gcp_smoke
+```
+
+The smoke script uses:
+- Pub/Sub publish/pull
+- the validation gate in `vertex_agent.ingester`
+- BigQuery inserts/queries
+
+If you use another project, pass `--project`, `--topic`, `--subscription`,
+`--dataset`, and `--table` explicitly.
+
 ---
 
 ## Quality gates
