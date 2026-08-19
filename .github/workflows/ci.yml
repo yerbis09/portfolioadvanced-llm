@@ -1,0 +1,125 @@
+name: CI — Quality & Tests
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── 1. Secrets detection ───────────────────────────────────────────────────
+  secrets-scan:
+    name: Secrets scan (detect-secrets)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dev deps
+        run: uv sync --group dev
+
+      - name: Detect secrets — audit baseline
+        run: uv run detect-secrets audit .secrets.baseline --report --fail-on-unaudited --fail-on-live
+
+      - name: Detect secrets — scan new files
+        run: |
+          uv run detect-secrets scan \
+            --exclude-files "uv\.lock|\.git|\.secrets\.baseline" \
+            --baseline .secrets.baseline
+
+  # ── 2. Lint & format ───────────────────────────────────────────────────────
+  lint:
+    name: Ruff (lint + format)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dev deps
+        run: uv sync --group dev
+
+      - name: Ruff check
+        run: uv run ruff check pubsub_archetype/
+
+      - name: Ruff format
+        run: uv run ruff format --check pubsub_archetype/
+
+  # ── 3. Unit tests ─────────────────────────────────────────────────────────
+  unit-tests:
+    name: Unit tests (pytest)
+    runs-on: ubuntu-latest
+    needs: [secrets-scan, lint]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install deps
+        run: uv sync --group dev
+
+      - name: Run unit tests with coverage
+        run: |
+          uv run pytest pubsub_archetype/tests/ \
+            -v \
+            --tb=short \
+            --junitxml=junit-unit.xml \
+            --cov=pubsub_archetype \
+            --cov-report=xml:coverage.xml \
+            --cov-report=term-missing \
+            --cov-fail-under=70
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  # ── 4. SonarQube analysis ─────────────────────────────────────────────────
+  sonar:
+    name: SonarQube Cloud analysis
+    runs-on: ubuntu-latest
+    needs: [unit-tests]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install sonarqube-cli
+        run: curl -o- https://raw.githubusercontent.com/SonarSource/sonarqube-cli/refs/heads/master/user-scripts/install.sh | bash
+
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+
+      - name: SonarQube analyze
+        env:
+          SONARQUBE_CLI_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONARQUBE_CLI_ORG: yerbis09
+        run: |
+          export PATH="$HOME/.local/share/sonarqube-cli/bin:$PATH"
+          sonar analyze \
+            --file pubsub_archetype/archetype.py \
+            --file pubsub_archetype/validation_result.py \
+            --file pubsub_archetype/classifying_receiver.py \
+            --file pubsub_archetype/gateway.py \
+            --project portfolioadvanced-llm \
+            --depth DEEP

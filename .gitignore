@@ -1,10 +1,100 @@
-# Python-generated files
+# ── Python ───────────────────────────────────────────────────────────────────
 __pycache__/
-*.py[oc]
-build/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
 dist/
+build/
 wheels/
-*.egg-info
+MANIFEST
+.eggs/
+pip-wheel-metadata/
+share/python-wheels/
 
-# Virtual environments
-.venv
+# ── Virtual environments ──────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+.env/
+
+# ── uv ───────────────────────────────────────────────────────────────────────
+# uv.lock is intentionally committed for reproducibility — do NOT add it here
+
+# ── Testing & coverage ───────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+*.coveragerc
+junit*.xml
+
+# ── Linting / type-checking ───────────────────────────────────────────────────
+.ruff_cache/
+.mypy_cache/
+.dmypy.json
+
+# ── Secrets detection ────────────────────────────────────────────────────────
+# .secrets.baseline IS committed (tracks known false-positives)
+# Never commit actual secrets — use env vars or Secret Manager
+
+# ── GCP / Google Cloud credentials ───────────────────────────────────────────
+application_default_credentials.json
+*-service-account*.json
+*-sa-key*.json
+gcloud/
+.config/gcloud/
+
+# ── Environment variable files ────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.env
+
+# ── IDEs ─────────────────────────────────────────────────────────────────────
+.vscode/settings.json
+.vscode/launch.json
+.vscode/*.log
+.idea/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+Thumbs.db
+
+# ── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ── Notebooks (outputs can contain secrets/data) ─────────────────────────────
+*.ipynb_checkpoints/
+
+# ── Build artifacts ──────────────────────────────────────────────────────────
+*.jar
+*.war
+*.class
+target/
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Terraform ────────────────────────────────────────────────────────────────
+*.tfstate
+*.tfstate.*
+.terraform/
+*.tfvars
+!*.tfvars.example
+
+# ── Sonar local cache ─────────────────────────────────────────────────────────
+.scannerwork/

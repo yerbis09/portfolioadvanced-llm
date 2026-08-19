@@ -1,7 +1,8 @@
 """
-tests/test_archetype.py — Puerto Python de ArchetypeTest.java (PR #425)
+tests/test_archetype.py — Tests del gate de validacion Archetype.
 
-Covers: accept, each deterministic reject class, NFD->NFC canonicalization.
+Cubre: accept, cada clase de rechazo determinista, canonicalizacion NFD->NFC.
+Los errores se comprueban como datos estructurados (ValidationError), no strings.
 """
 
 import json
@@ -37,14 +38,11 @@ class TestAccept:
         assert result.canonical is not None
 
     def test_nfd_normalized_to_nfc(self, gate):
-        # NFD ñ (n + combining tilde) should be accepted after NFC normalization
-        nfd_payload = {"event_type": "data_ingest", "payload": {}, "version": "1.0"}
-        raw = json.dumps(nfd_payload).encode("utf-8")
-        # Manually inject NFD
+        payload = {"event_type": "data_ingest", "payload": {}, "version": "1.0"}
+        raw = json.dumps(payload).encode("utf-8")
         nfd_raw = unicodedata.normalize("NFD", raw.decode("utf-8")).encode("utf-8")
         result = gate.validate(nfd_raw)
         assert result.status == Status.ACCEPTED
-        # canonical must be NFC
         assert result.canonical == unicodedata.normalize("NFC", result.canonical)
 
 
@@ -52,24 +50,24 @@ class TestDeterministicRejects:
     def test_not_json(self, gate):
         result = gate.validate(b"not json at all")
         assert result.status == Status.REJECTED
-        assert any("SYNTAX_NOT_JSON" in r for r in result.reasons)
+        assert any(e.code == "SYNTAX_NOT_JSON" for e in result.errors)
 
     def test_invalid_charset(self, gate):
         result = gate.validate(b"\xff\xfe bad bytes", declared_charset="utf-8")
         assert result.status == Status.REJECTED
-        assert any("ENCODING_UNDECODABLE" in r for r in result.reasons)
+        assert any(e.code == "ENCODING_UNDECODABLE" for e in result.errors)
 
     def test_bad_enum(self, gate):
         bad = {**VALID, "event_type": "not_a_valid_type"}
         result = gate.validate(_encode(bad))
         assert result.status == Status.REJECTED
-        assert any("CONTRACT_VIOLATION" in r for r in result.reasons)
+        assert any(e.code == "CONTRACT_VIOLATION" for e in result.errors)
 
     def test_missing_required_field(self, gate):
-        missing = {"event_type": "llm_response", "payload": {}}  # no version
+        missing = {"event_type": "llm_response", "payload": {}}
         result = gate.validate(_encode(missing))
         assert result.status == Status.REJECTED
-        assert any("CONTRACT_VIOLATION" in r for r in result.reasons)
+        assert any(e.code == "CONTRACT_VIOLATION" for e in result.errors)
 
     def test_additional_property_rejected(self, gate):
         extra = {**VALID, "unexpected_field": "oops"}
@@ -77,10 +75,26 @@ class TestDeterministicRejects:
         assert result.status == Status.REJECTED
 
     def test_wrong_type_for_version(self, gate):
-        bad_type = {**VALID, "version": 1}  # should be string
+        bad_type = {**VALID, "version": 1}
         result = gate.validate(_encode(bad_type))
         assert result.status == Status.REJECTED
 
     def test_empty_bytes(self, gate):
         result = gate.validate(b"")
         assert result.status == Status.REJECTED
+
+    def test_errors_are_structured_data(self, gate):
+        """Los errores son ValidationError con path/code/message, no strings ad-hoc."""
+        bad = {**VALID, "event_type": "bad_enum"}
+        result = gate.validate(_encode(bad))
+        for err in result.errors:
+            assert hasattr(err, "path")
+            assert hasattr(err, "code")
+            assert hasattr(err, "message")
+            assert err.path.startswith("$")
+
+    def test_reasons_compat_property(self, gate):
+        """reasons sigue disponible para logging/serialización."""
+        result = gate.validate(b"not json")
+        assert isinstance(result.reasons, list)
+        assert len(result.reasons) > 0

@@ -82,7 +82,7 @@ DEMO_PAYLOADS = [
 
 
 def run_demo(schema_path: Path, charset: str) -> None:
-    gate = Archetype(schema_path)
+    gate = Archetype.from_path(schema_path)
     sep = "-" * 60
     print(f"\n{sep}")
     print("  Archetype Validation Gate -- offline demo")

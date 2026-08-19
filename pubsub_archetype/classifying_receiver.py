@@ -1,67 +1,79 @@
 """
-classifying_receiver.py — ClassifyingReceiver (Python port of PR #425).
+classifying_receiver.py — Subscriber con clasificacion de fallos para Pub/Sub.
 
-Subscriber that applies a three-way decision to every incoming message:
-  - ACCEPTED          -> process normally, ack().
-  - TRANSIENT failure -> nack(), let Pub/Sub retry with backoff -> dead-letter.
-  - FUNCTIONAL REJECT -> ack() + park in quarantine (never bounce).
+Aplica una decision de tres vias a cada mensaje:
+  - ACCEPTED          -> handler OK, ack().
+  - TRANSIENT failure -> nack(), deja que Pub/Sub reintente con backoff -> dead-letter.
+  - FUNCTIONAL REJECT -> ack() + quarantine. Nunca rebota.
 
-Patron creacional: Builder — ReceiverBuilder construye el ClassifyingReceiver
-con configuracion progresiva antes de sellarlo.
+Solo los fallos transitorios usan la maquinaria de redelivery.
+
+Por qué dataclass en vez de Builder
+-------------------------------------
+Java necesita el patron Builder porque carece de keyword arguments y defaults.
+Python los tiene nativos: ClassifyingReceiver(handler=h, quarantine=q) ES el builder,
+es inmutable con frozen=True y autodocumentado. Cero metodos encadenados, cero .build().
 """
 
 from __future__ import annotations
 
 import logging
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import Any, Protocol, runtime_checkable
 
 logger = logging.getLogger(__name__)
 
 
 class TransientError(Exception):
-    """Raised by the handler to signal a recoverable, transient failure."""
+    """Señala un fallo recuperable (timeout, 5xx, red). Pub/Sub reintentara."""
 
 
 class FunctionalRejectError(Exception):
-    """Raised by the handler to signal a deterministic, non-recoverable failure."""
+    """Señala un fallo determinista (id desconocido, duplicado, regla de negocio).
+    El mensaje se acepta (ack) y se aparca en cuarentena; nunca rebota."""
 
 
 @runtime_checkable
 class PubSubMessage(Protocol):
-    """Structural protocol for google.cloud.pubsub_v1 Message."""
+    """
+    Protocolo estructural para google.cloud.pubsub_v1 Message.
 
-    message_id: str
+    Usar Protocol desacopla del SDK sin adapters — imposible en Java sin
+    interfaces + wrappers. El duck typing con contrato es suficiente.
+
+    Note: message_id se expone como atributo read-only en el SDK real.
+    @runtime_checkable verifica presencia pero no firma; no usar isinstance
+    como sustituto de tipado estricto.
+    """
+
+    message_id: str  # read-only en el SDK
 
     def ack(self) -> None: ...
     def nack(self) -> None: ...
 
 
+Handler = Callable[[Any], None]
+Quarantine = Callable[[Any, str], None]
+
+
+@dataclass(frozen=True)
 class ClassifyingReceiver:
     """
-    Wraps a Pub/Sub message handler and classifies processing failures.
+    Receptor clasificador. Construye directamente con keyword args:
 
-    Build via ReceiverBuilder:
-        receiver = (
-            ReceiverBuilder()
-            .with_handler(my_handler)
-            .with_quarantine(my_quarantine_fn)
-            .build()
-        )
+        receiver = ClassifyingReceiver(handler=my_fn, quarantine=my_q)
+
+    Inmutable por frozen=True; igualdad estructural gratis.
     """
 
-    def __init__(
-        self,
-        handler: Callable[[Any], None],
-        quarantine: Callable[[Any, str], None],
-    ) -> None:
-        self._handler = handler
-        self._quarantine = quarantine
+    handler: Handler
+    quarantine: Quarantine
 
     def handle(self, message: PubSubMessage) -> None:
-        """Process one Pub/Sub message with three-way classification."""
+        """Procesa un mensaje Pub/Sub con decision de tres vias."""
         try:
-            self._handler(message)
+            self.handler(message)
             message.ack()
             logger.debug("ACCEPTED: message %s", message.message_id)
 
@@ -72,12 +84,10 @@ class ClassifyingReceiver:
         except FunctionalRejectError as exc:
             reason = str(exc)
             logger.error(
-                "FUNCTIONAL_REJECT: message %s — %s (ack+quarantine)",
-                message.message_id,
-                reason,
+                "FUNCTIONAL_REJECT: message %s — %s (ack+quarantine)", message.message_id, reason
             )
             try:
-                self._quarantine(message, reason)
+                self.quarantine(message, reason)
             except Exception as q_exc:
                 logger.error("Quarantine failed for message %s: %s", message.message_id, q_exc)
             message.ack()
@@ -85,32 +95,3 @@ class ClassifyingReceiver:
         except Exception as exc:
             logger.exception("UNKNOWN: message %s — %s (nack)", message.message_id, exc)
             message.nack()
-
-
-class ReceiverBuilder:
-    """
-    Builder pattern for ClassifyingReceiver.
-
-    Allows progressive configuration and enforces required fields at build time.
-    """
-
-    def __init__(self) -> None:
-        self._handler: Callable[[Any], None] | None = None
-        self._quarantine: Callable[[Any, str], None] | None = None
-
-    def with_handler(self, handler: Callable[[Any], None]) -> ReceiverBuilder:
-        self._handler = handler
-        return self
-
-    def with_quarantine(self, quarantine: Callable[[Any, str], None]) -> ReceiverBuilder:
-        self._quarantine = quarantine
-        return self
-
-    def build(self) -> ClassifyingReceiver:
-        if self._handler is None:
-            msg = "handler is required"
-            raise ValueError(msg)
-        if self._quarantine is None:
-            msg = "quarantine function is required"
-            raise ValueError(msg)
-        return ClassifyingReceiver(self._handler, self._quarantine)

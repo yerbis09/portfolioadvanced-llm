@@ -1,20 +1,18 @@
-"""pubsub_archetype — Archetype validation gate for Cloud Pub/Sub (Python port of PR #425)."""
+"""pubsub_archetype -- Gate de validacion de payloads para Cloud Pub/Sub.
+
+Invariante: Archetype.validate es total -- nunca lanza, errores son valores.
+"""
 
 from .archetype import Archetype
-from .classifying_receiver import (
-    ClassifyingReceiver,
-    FunctionalRejectError,
-    ReceiverBuilder,
-    TransientError,
-)
-from .validation_result import Status, ValidationResult
+from .classifying_receiver import ClassifyingReceiver, FunctionalRejectError, TransientError
+from .validation_result import Status, ValidationError, ValidationResult
 
 __all__ = [
     "Archetype",
     "ClassifyingReceiver",
     "FunctionalRejectError",
-    "ReceiverBuilder",
     "Status",
     "TransientError",
+    "ValidationError",
     "ValidationResult",
 ]

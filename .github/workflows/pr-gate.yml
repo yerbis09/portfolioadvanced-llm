@@ -1,0 +1,82 @@
+name: PR Gate — Block merge on failures
+
+on:
+  pull_request:
+    branches: ["master", "main", "develop"]
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: pr-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Gate: todo debe pasar antes de que el PR sea mergeable ────────────────
+  pr-gate:
+    name: PR Gate
+    runs-on: ubuntu-latest
+    needs: []
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install all deps
+        run: uv sync --group dev
+
+      # 1. Secrets
+      - name: Secrets scan
+        run: |
+          uv run detect-secrets scan \
+            --exclude-files "uv\.lock|\.git|\.secrets\.baseline" \
+            --baseline .secrets.baseline
+
+      # 2. Lint
+      - name: Ruff check
+        run: uv run ruff check pubsub_archetype/
+
+      - name: Ruff format
+        run: uv run ruff format --check pubsub_archetype/
+
+      # 3. Unit tests + coverage
+      - name: Unit tests + coverage
+        run: |
+          uv run pytest pubsub_archetype/tests/ \
+            -v --tb=short \
+            --junitxml=junit-pr.xml \
+            --cov=pubsub_archetype \
+            --cov-report=xml:coverage.xml \
+            --cov-fail-under=70
+
+      # 4. SonarQube — solo ficheros cambiados en el PR
+      - name: Install sonarqube-cli
+        run: curl -o- https://raw.githubusercontent.com/SonarSource/sonarqube-cli/refs/heads/master/user-scripts/install.sh | bash
+
+      - name: SonarQube — changed files only
+        env:
+          SONARQUBE_CLI_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONARQUBE_CLI_ORG: yerbis09
+        run: |
+          export PATH="$HOME/.local/share/sonarqube-cli/bin:$PATH"
+          # Analiza solo los ficheros Python modificados en el PR
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD \
+            | grep '\.py$' | grep -v 'tests/' || true)
+          if [ -n "$CHANGED" ]; then
+            FILES=$(echo "$CHANGED" | xargs -I{} echo "--file {}" | tr '\n' ' ')
+            sonar analyze $FILES --project portfolioadvanced-llm --depth DEEP
+          else
+            echo "No Python source files changed — skipping Sonar"
+          fi
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-test-results
+          path: |
+            junit-pr.xml
+            coverage.xml
