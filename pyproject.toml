@@ -10,6 +10,9 @@ requires-python = ">=3.13"
 dependencies = [
     "jsonschema>=4.26.0",
     "pydantic>=2.13.4",
+    "google-cloud-bigquery>=3.25.0",
+    "google-cloud-pubsub>=2.23.0",
+    "google-cloud-aiplatform>=1.65.0",
 ]
 
 [project.scripts]
@@ -28,7 +31,11 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["pubsub_archetype/tests"]
+testpaths = ["pubsub_archetype/tests", "vertex_agent/tests"]
+
+[[tool.uv.index]]
+url = "https://pypi.org/simple"
+default = true
 
 [tool.ruff]
 line-length = 100
@@ -53,6 +60,7 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "pubsub_archetype/tests/*" = ["ANN", "S"]
+"vertex_agent/tests/*" = ["ANN", "I", "S"]
 
 [tool.ruff.format]
 quote-style = "double"

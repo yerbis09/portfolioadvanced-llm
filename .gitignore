@@ -96,5 +96,6 @@ logs/
 *.tfvars
 !*.tfvars.example
 
-# ── Sonar local cache ─────────────────────────────────────────────────────────
-.scannerwork/
+# ── Local developer settings (secrets) ───────────────────────────────────────
+local.settings
+
