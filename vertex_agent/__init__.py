@@ -14,8 +14,29 @@ Architecture:
 """
 
 from vertex_agent.agent import Agent
+from vertex_agent.corpus import BigQueryCorpus
+from vertex_agent.document_ai import DocumentAiProcessor
+from vertex_agent.evaluation import EvaluationResult, evaluate_answer
+from vertex_agent.improvements import ImprovementSuggestion, suggest_improvements
 from vertex_agent.ingester import Ingester
 from vertex_agent.mcp_server import main as mcp_main
+from vertex_agent.monitoring import MetricRecord, MetricsPublisher
+from vertex_agent.retraining import RetrainingSignal, RetrainingTrigger
 from vertex_agent.retriever import Retriever
 
-__all__ = ["Agent", "Ingester", "Retriever", "mcp_main"]
+__all__ = [
+    "Agent",
+    "BigQueryCorpus",
+    "DocumentAiProcessor",
+    "EvaluationResult",
+    "ImprovementSuggestion",
+    "Ingester",
+    "MetricRecord",
+    "MetricsPublisher",
+    "RetrainingSignal",
+    "RetrainingTrigger",
+    "Retriever",
+    "evaluate_answer",
+    "mcp_main",
+    "suggest_improvements",
+]

@@ -1,5 +1,9 @@
 {
   "mcpServers": {
+    "portfolioadvanced-llm": {
+      "command": "uv",
+      "args": ["run", "portfolioadvanced-llm-mcp"]
+    },
     "sonarqube": {
       "command": "sonar",
       "args": [

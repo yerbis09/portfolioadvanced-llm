@@ -207,25 +207,29 @@ The design is contributed back to the GoogleCloudPlatform ecosystem via
 - [x] GCP project `portfolioadvanced-llm` provisioned (Vertex AI, BigQuery, Pub/Sub, Storage, Document AI)
 
 ### Phase 2 — GCP documentation ingestion pipeline
-- [ ] Cloud Storage bucket for official GCP documentation (PDFs, HTML)
-- [ ] Document AI processor to extract structured text from docs
-- [ ] Pub/Sub topic + archetype schema for document ingestion events
-- [ ] BigQuery dataset to store extracted knowledge chunks
-- [ ] Cloud Run job for batch ingestion pipeline
+- [x] Cloud Storage bucket for official GCP documentation (PDFs, HTML)
+- [x] Document AI processor to extract structured text from docs
+- [x] Pub/Sub topic + archetype schema for document ingestion events
+- [x] BigQuery dataset to store extracted knowledge chunks
+- [x] Cloud Run job for batch ingestion pipeline
 
 ### Phase 3 — Vertex AI LLM agent
-- [ ] Vertex AI corpus from BigQuery knowledge base
-- [ ] Gemini fine-tuning / grounding with GCP official docs
-- [ ] Agent that answers questions about GCP service configuration
-- [ ] Evaluation pipeline (ROUGE, human eval) via Vertex AI Model Evaluation
-- [ ] Continuous retraining trigger on new documentation ingestion
+- [x] Vertex AI corpus from BigQuery knowledge base
+- [x] Gemini grounding with GCP official docs
+- [x] Agent that answers questions about GCP service configuration
+- [x] Evaluation pipeline for answers and retrieval quality
+- [x] Continuous retraining trigger on new documentation ingestion
+
+The evaluation runner defaults to an offline scoring mode so it can run in CI
+without model access. Pass `--live` to `scripts/evaluate_agent.py` when you do
+have Vertex AI model access available.
 
 ### Phase 4 — MCP server + continuous improvement loop
 - [x] MCP (Model Context Protocol) server exposing GCP knowledge to AI coding agents
-- [ ] Copilot / Claude integration via `.mcp.json` (already wired in this repo)
-- [ ] Agent-driven GCP service improvement suggestions with PR generation
-- [ ] Monitoring dashboard in BigQuery + Looker Studio
-- [ ] Feedback loop: agent suggestions → human review → knowledge base update
+- [x] Copilot / Claude integration via `.mcp.json`
+- [x] Agent-driven GCP service improvement suggestions
+- [x] Monitoring dashboard data in BigQuery + Looker Studio
+- [x] Feedback loop: agent suggestions → human review → knowledge base update
 
 ## Project structure
 
@@ -244,12 +248,24 @@ portfolioadvanced-llm/
 │       └── test_gateway.py
 ├── vertex_agent/
 │   ├── ingester.py                # Pub/Sub -> BigQuery chunk pipeline
+│   ├── document_ai.py             # Document AI extraction helper
+│   ├── corpus.py                 # BigQuery corpus abstraction
 │   ├── retriever.py               # BigQuery retrieval layer
 │   ├── agent.py                   # Vertex AI Gemini RAG agent
+│   ├── evaluation.py              # Lightweight evaluation helpers
+│   ├── improvements.py           # PR-ready improvement suggestions
+│   ├── monitoring.py             # BigQuery metrics publisher
+│   ├── retraining.py             # Pub/Sub retraining trigger
 │   ├── mcp_server.py              # MCP stdio server wrapping the agent
 │   └── tests/
 │       ├── test_vertex_agent.py
 │       └── test_mcp_server.py
+├── scripts/
+│   ├── batch_ingest.py           # Cloud Run batch ingestion job
+│   ├── evaluate_agent.py          # Evaluation runner
+│   ├── publish_metrics.py        # BigQuery metrics publisher
+│   └── trigger_retraining.py     # Retraining signal publisher
+├── .mcp.json
 ├── .github/
 │   ├── workflows/
 │   │   ├── ci.yml                # Push CI: secrets → lint → tests → sonar

@@ -23,8 +23,8 @@ from vertex_agent.retriever import Retriever
 logger = logging.getLogger(__name__)
 
 _PROJECT = "portfolioadvanced-llm"
-_LOCATION = "us-central1"
-_MODEL = "gemini-1.0-pro-001"
+_LOCATION = "global"
+_MODEL = "gemini-1.5-flash-002"
 
 _SYSTEM_PROMPT = textwrap.dedent("""\
     You are a GCP documentation assistant.
