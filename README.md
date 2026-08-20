@@ -222,6 +222,19 @@ The design is contributed back to the GoogleCloudPlatform ecosystem via
 
 ---
 
+## Portfolio deployment target
+
+The portfolio showcase page is not deployed yet. When it is live, add the final
+URL here and reuse this outline:
+
+- problem statement
+- Python port vs Java reference
+- quality gates and smoke tests
+- GCP resources used
+- MCP server demo
+
+---
+
 ## Project structure
 
 ```
