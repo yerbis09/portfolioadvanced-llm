@@ -14,12 +14,23 @@ real GCP smoke tests, a GCP-native ingestion pipeline, and an MCP entrypoint.
 
 - Upstream Java PR: [GoogleCloudPlatform/pubsub#425](https://github.com/GoogleCloudPlatform/pubsub/pull/425)
 - Companion write-up: [PYTHON_COMPANION.md](PYTHON_COMPANION.md)
-- Diagrams: [docs/architecture.md](docs/architecture.md)
+- Draw.io diagram: [docs/architecture.drawio](docs/architecture.drawio)
 - Public portfolio: [workedtowork](https://yerbis09.github.io/workedtowork/)
 
 ## Architecture
 
-See [docs/architecture.md](docs/architecture.md) for a Lucidchart-ready outline.
+The architecture is drawn in [docs/architecture.drawio](docs/architecture.drawio)
+and shows:
+
+1. GCP docs stored in Cloud Storage
+2. Document AI extraction
+3. Pub/Sub ingestion events
+4. The Python validation gate
+5. BigQuery as the knowledge corpus
+6. Vertex AI RAG answers
+7. MCP exposure for coding agents
+8. Metrics and retraining feedback
+9. OAuth/ADC smoke tests on real infrastructure
 
 ## Run
 
