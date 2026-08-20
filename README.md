@@ -15,25 +15,25 @@ infrastructure.
 
 - Upstream Java PR: [GoogleCloudPlatform/pubsub#425](https://github.com/GoogleCloudPlatform/pubsub/pull/425)
 - Companion write-up: [PYTHON_COMPANION.md](PYTHON_COMPANION.md)
-- Draw.io diagram: [docs/architecture.drawio](docs/architecture.drawio)
+- Linked diagrams: [docs/architecture.md](docs/architecture.md)
 - Public portfolio: [workedtowork](https://yerbis09.github.io/workedtowork/)
 
 ## Architecture
 
-Open [docs/architecture.drawio](docs/architecture.drawio) in diagrams.net /
-draw.io.
+See [docs/architecture.md](docs/architecture.md). It explains the flow in
+English and keeps the diagram source linked from the README.
 
-It shows, in English:
+The process is:
 
-1. Official GCP docs stored in Cloud Storage
-2. Document AI extracting text and structure
-3. Pub/Sub ingestion events
-4. The Python validation gate
-5. BigQuery as the knowledge corpus
-6. Vertex AI grounded answers
-7. MCP exposure for coding agents
-8. Metrics and retraining feedback
-9. OAuth/ADC smoke tests on real infrastructure
+1. Official GCP docs are stored in Cloud Storage.
+2. Document AI extracts text and structure from each document.
+3. Pub/Sub carries ingestion events into the Python validation gate.
+4. The gate rejects invalid payloads before they are published downstream.
+5. BigQuery stores the extracted chunks as the knowledge corpus.
+6. Vertex AI answers questions with grounded context from that corpus.
+7. The MCP server exposes the capability to coding agents.
+8. Metrics and retraining signals close the feedback loop.
+9. OAuth/ADC smoke tests prove the pipeline on real infrastructure.
 
 ## Run
 
