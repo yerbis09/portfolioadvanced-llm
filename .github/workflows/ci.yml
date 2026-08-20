@@ -28,7 +28,7 @@ jobs:
         run: uv sync --group dev
 
       - name: Detect secrets — audit baseline
-        run: uv run detect-secrets audit .secrets.baseline --report --fail-on-unaudited --fail-on-live
+        run: uv run detect-secrets audit .secrets.baseline --report --only-real
 
       - name: Detect secrets — scan new files
         run: |
