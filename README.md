@@ -19,16 +19,7 @@ real GCP smoke tests, a GCP-native ingestion pipeline, and an MCP entrypoint.
 
 ## Architecture
 
-```mermaid
-flowchart LR
-  A[Official GCP docs] --> B[Document AI]
-  B --> C[Pub/Sub doc-ingestion-events]
-  C --> D[vertex_agent.ingester]
-  D --> E[BigQuery llm_knowledge.chunks]
-  E --> F[vertex_agent.agent]
-  F --> G[MCP server]
-  F --> H[Metrics / retraining signals]
-```
+See [docs/architecture.md](docs/architecture.md) for a Lucidchart-ready outline.
 
 ## Run
 

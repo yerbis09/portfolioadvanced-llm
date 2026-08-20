@@ -1,26 +1,30 @@
-# Architecture diagrams
+# Architecture outline for Lucidchart
 
-## End-to-end flow
+## Boxes
 
-```mermaid
-flowchart LR
-  A[Docs bucket] --> B[Document AI]
-  B --> C[Pub/Sub ingestion event]
-  C --> D[Python gate]
-  D --> E[BigQuery chunks]
-  E --> F[Vertex AI agent]
-  F --> G[MCP server]
-```
+- Official GCP docs
+- Document AI processor
+- Pub/Sub topic: `doc-ingestion-events`
+- Python validation gate
+- BigQuery dataset: `llm_knowledge`
+- Vertex AI RAG agent
+- MCP server
+- Metrics and retraining signals
+
+## Arrows
+
+- Official GCP docs → Document AI processor
+- Document AI processor → Pub/Sub topic: `doc-ingestion-events`
+- Pub/Sub topic: `doc-ingestion-events` → Python validation gate
+- Python validation gate → BigQuery dataset: `llm_knowledge`
+- BigQuery dataset: `llm_knowledge` → Vertex AI RAG agent
+- Vertex AI RAG agent → MCP server
+- Vertex AI RAG agent → Metrics and retraining signals
 
 ## Smoke test flow
 
-```mermaid
-sequenceDiagram
-  participant Dev as Developer
-  participant PubSub as Pub/Sub
-  participant BQ as BigQuery
-  Dev->>PubSub: publish valid payload
-  PubSub-->>Dev: round-trip message
-  Dev->>BQ: insert/query chunks
-  BQ-->>Dev: smoke=ok
-```
+- Developer authenticates with OAuth / ADC
+- Developer publishes a valid payload to Pub/Sub
+- Subscriber round-trip is verified
+- BigQuery insert/query is verified
+- Smoke test reports `smoke=ok`
