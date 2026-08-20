@@ -6,6 +6,13 @@ Built to feed a GCP-native LLM agent that continuously improves Google Cloud ser
 
 ---
 
+## Public references
+
+- Upstream Java prober: [GoogleCloudPlatform/pubsub PR #425](https://github.com/GoogleCloudPlatform/pubsub/pull/425)
+- Python/GCP companion: [PYTHON_COMPANION.md](PYTHON_COMPANION.md)
+
+---
+
 ## Why Python over Java
 
 The upstream reference implementation ([GoogleCloudPlatform/pubsub PR #425](https://github.com/GoogleCloudPlatform/pubsub/pull/425)) is Java 8 + Maven.
