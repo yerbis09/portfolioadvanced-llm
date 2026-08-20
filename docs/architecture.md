@@ -4,32 +4,35 @@ Use this page as the linked source for the presentation diagram.
 
 ## Main flow
 
-```text
-Cloud Storage docs
-   ↓
-Document AI
-   ↓
-Pub/Sub ingestion events
-   ↓
-Python validation gate
-   ↓
-BigQuery knowledge corpus
-   ↓
-Vertex AI RAG agent
-   ↓
-MCP server
+```mermaid
+flowchart TD
+    A["🗂️ Cloud Storage docs"]
+    B["📄 Document AI"]
+    C["📨 Pub/Sub ingestion events"]
+    D["🐍 Python validation gate"]
+    E["📊 BigQuery knowledge corpus"]
+    F["🤖 Vertex AI RAG agent"]
+    G["🧩 MCP server"]
+
+    A --> B --> C --> D --> E --> F --> G
 ```
 
 ## Feedback loop
 
-```text
-Vertex AI RAG agent
-   ├─→ Metrics / evaluation
-   └─→ Retraining signals
+```mermaid
+flowchart LR
+    RAG["🤖 Vertex AI RAG agent"]
+    MET["📈 Metrics / evaluation"]
+    RET["🔁 Retraining signals"]
 
-OAuth / ADC smoke tests
-   ├─→ Pub/Sub round-trip
-   └─→ BigQuery insert/query
+    SMOKE["✅ OAuth / ADC smoke tests"]
+    PUBSUB["📨 Pub/Sub round-trip"]
+    BQ["📊 BigQuery insert/query"]
+
+    RAG --> MET
+    RAG --> RET
+    SMOKE --> PUBSUB
+    SMOKE --> BQ
 ```
 
 ## How the process works
