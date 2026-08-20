@@ -1,8 +1,16 @@
 ﻿# portfolioadvanced-llm
 
-A **total validation gate** for Cloud Pub/Sub payloads, implemented in idiomatic Python.
-`Archetype.validate()` never raises on malformed input — errors are values, not exceptions.
-Built to feed a GCP-native LLM agent that continuously improves Google Cloud services.
+A public GCP-native companion project that turns the original Pub/Sub gate
+idea into a Python validation stack, a real smoke-tested pipeline, and an MCP
+exposure layer for AI coding agents.
+
+## Highlights
+
+- total validation gate for Cloud Pub/Sub payloads in idiomatic Python
+- real GCP smoke tests using OAuth / ADC only
+- Document AI → Pub/Sub → BigQuery ingestion path
+- Vertex AI RAG agent and MCP server entrypoint
+- structured outputs, metrics, retraining signals, and improvement hints
 
 ---
 
@@ -10,6 +18,7 @@ Built to feed a GCP-native LLM agent that continuously improves Google Cloud ser
 
 - Upstream Java prober: [GoogleCloudPlatform/pubsub PR #425](https://github.com/GoogleCloudPlatform/pubsub/pull/425)
 - Python/GCP companion: [PYTHON_COMPANION.md](PYTHON_COMPANION.md)
+- Public portfolio site: [workedtowork](https://yerbis09.github.io/workedtowork/)
 
 ---
 
