@@ -1,13 +1,14 @@
 # portfolioadvanced-llm
 
 Python companion project for the Pub/Sub gate idea: a clean validation layer,
-real GCP smoke tests, a GCP-native ingestion pipeline, and an MCP entrypoint.
+a real GCP ingestion pipeline, an MCP entrypoint, and smoke tests against live
+infrastructure.
 
 ## What it shows
 
-- Total validation gate for Pub/Sub payloads
-- Document AI → Pub/Sub → BigQuery ingestion path
-- Vertex AI RAG agent and MCP server
+- A total validation gate for Pub/Sub payloads
+- A Document AI → Pub/Sub → BigQuery ingestion path
+- A Vertex AI RAG agent and MCP server
 - OAuth/ADC smoke tests against real GCP
 
 ## References
@@ -19,15 +20,17 @@ real GCP smoke tests, a GCP-native ingestion pipeline, and an MCP entrypoint.
 
 ## Architecture
 
-The architecture is drawn in [docs/architecture.drawio](docs/architecture.drawio)
-and shows:
+Open [docs/architecture.drawio](docs/architecture.drawio) in diagrams.net /
+draw.io.
 
-1. GCP docs stored in Cloud Storage
-2. Document AI extraction
+It shows, in English:
+
+1. Official GCP docs stored in Cloud Storage
+2. Document AI extracting text and structure
 3. Pub/Sub ingestion events
 4. The Python validation gate
 5. BigQuery as the knowledge corpus
-6. Vertex AI RAG answers
+6. Vertex AI grounded answers
 7. MCP exposure for coding agents
 8. Metrics and retraining feedback
 9. OAuth/ADC smoke tests on real infrastructure
