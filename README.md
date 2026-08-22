@@ -16,12 +16,16 @@ infrastructure.
 - Upstream Java PR: [GoogleCloudPlatform/pubsub#425](https://github.com/GoogleCloudPlatform/pubsub/pull/425)
 - Companion write-up: [PYTHON_COMPANION.md](PYTHON_COMPANION.md)
 - Linked diagrams: [docs/architecture.md](docs/architecture.md)
+- Live services snapshot: [COMMUNITY_SNAPSHOT.md](COMMUNITY_SNAPSHOT.md)
 - Public portfolio: [workedtowork](https://yerbis09.github.io/workedtowork/)
 
 ## Architecture
 
 See [docs/architecture.md](docs/architecture.md). It explains the flow in
-English and keeps the diagram source linked from the README.
+English and keeps the diagram source linked from the README. The
+[Live infrastructure](docs/architecture.md#live-infrastructure-validated-smokeok)
+section shows a Mermaid diagram of the exact resources provisioned and
+validated end-to-end (`smoke=ok`).
 
 The process is:
 
@@ -41,7 +45,7 @@ The process is:
 uv sync --group dev
 uv run pytest
 uv run python -m scripts.gcp_smoke
-uv run portfolioadvanced-llm-mcp
+uv run python -m vertex_agent.mcp_server
 ```
 
 For real GCP smoke tests:
@@ -50,6 +54,13 @@ For real GCP smoke tests:
 gcloud auth login
 gcloud auth application-default login
 gcloud auth application-default set-quota-project portfolioadvanced-llm
+```
+
+## Demo (bring the infrastructure up and down)
+
+```bash
+./demo_up.sh     # recreate infra if missing, run the smoke test, probe the MCP server
+./demo_down.sh   # delete the demo infrastructure (Pub/Sub + BigQuery) to avoid billing
 ```
 
 ## Notes
