@@ -2,14 +2,11 @@
   "mcpServers": {
     "portfolioadvanced-llm": {
       "command": "uv",
-      "args": ["run", "portfolioadvanced-llm-mcp"]
+      "args": ["run", "python", "-m", "vertex_agent.mcp_server"]
     },
     "sonarqube": {
       "command": "sonar",
-      "args": [
-        "run",
-        "mcp"
-      ]
+      "args": ["run", "mcp"]
     }
   }
 }
